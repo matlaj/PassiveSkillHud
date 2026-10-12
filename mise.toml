@@ -1,0 +1,19 @@
+[settings]
+# The .NET SDK version comes from global.json, which the dotnet CLI and CI read too.
+idiomatic_version_file_enable_tools = ["dotnet"]
+
+[tasks.build]
+description = "Build the plugin (Release)"
+dir = "{{config_root}}/PassiveSkillHud"
+run = "dotnet build -c Release"
+
+[tasks.deploy]
+description = "Build and copy the plugin into an r2modman profile"
+usage = 'arg "[profile]" default="Default" help="r2modman profile name"'
+dir = "{{config_root}}/PassiveSkillHud"
+run = 'dotnet build -c Release -p:Deploy=true -p:ProfileName="{{usage.profile}}"'
+
+[tasks.package]
+description = "Build the Thunderstore upload zip into dist/"
+dir = "{{config_root}}/PassiveSkillHud"
+run = "dotnet build -c Release -p:Package=true"

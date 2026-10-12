@@ -1,0 +1,62 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <RestoreAdditionalProjectSources>https://nuget.bepinex.dev/v3/index.json</RestoreAdditionalProjectSources>
+  </PropertyGroup>
+
+  <!-- The one place the plugin's identity lives: the code reads it from MyPluginInfo and the assembly's description, the Thunderstore package from here. -->
+  <PropertyGroup>
+    <Authors>ntshtng</Authors>
+    <Product>PassiveSkillHud</Product>
+    <BepInExPluginGuid>$(Authors).$(Product)</BepInExPluginGuid>
+    <Version>1.0.0</Version>
+    <Description>Shows your survivor's passive skill above the skill bar, with its description on hover.</Description>
+    <ThunderstoreWebsiteUrl>https://github.com/matlaj/PassiveSkillHud</ThunderstoreWebsiteUrl>
+    <ThunderstoreDependencies>"bbepis-BepInExPack-5.4.2122"</ThunderstoreDependencies>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
+    <PackageReference Include="BepInEx.Core" Version="5.4.21" />
+    <PackageReference Include="BepInEx.PluginInfoProps" Version="2.1.0" PrivateAssets="all" />
+    <PackageReference Include="RiskOfRain2.GameLibs" Version="1.5.0-r.1" />
+    <PackageReference Include="UnityEngine.Modules" Version="2021.3.45" IncludeAssets="compile" />
+    <PackageReference Include="Rune580.Mods.RiskOfRain2.RiskOfOptions" Version="2.8.6" />
+  </ItemGroup>
+
+  <!-- dotnet build -p:Deploy=true copies the plugin into an r2modman profile for testing: pass -p:ProfileName=... for another profile, or -p:ProfileDir=... for one outside r2modman. -->
+  <PropertyGroup>
+    <ProfileName Condition="'$(ProfileName)' == ''">Default</ProfileName>
+    <ProfileDir Condition="'$(ProfileDir)' == ''">$(APPDATA)\r2modmanPlus-local\RiskOfRain2\profiles\$(ProfileName)</ProfileDir>
+  </PropertyGroup>
+  <Target Name="DeployToProfile" AfterTargets="Build" Condition="'$(Deploy)' == 'true'">
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ProfileDir)\BepInEx\plugins\$(AssemblyName)" />
+    <Copy SourceFiles="$(ThunderstoreIcon)" DestinationFolder="$(ProfileDir)\BepInEx\plugins\$(AssemblyName)" Condition="Exists('$(ThunderstoreIcon)')" />
+  </Target>
+
+  <!-- dotnet build -c Release -p:Package=true builds the Thunderstore upload zip in dist/. -->
+  <PropertyGroup>
+    <RepoDir>$(MSBuildProjectDirectory)\..</RepoDir>
+    <ThunderstoreIcon>$(RepoDir)\icons\icon.png</ThunderstoreIcon>
+    <!-- Keeps the build machine's paths (e.g. the .pdb path) out of the published DLL. -->
+    <ContinuousIntegrationBuild Condition="'$(Package)' == 'true'">true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+  <Target Name="ThunderstorePackage" AfterTargets="Build" Condition="'$(Package)' == 'true'">
+    <PropertyGroup>
+      <PackageStagingDir>$(IntermediateOutputPath)thunderstore</PackageStagingDir>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(ThunderstoreIcon)')" Text="Thunderstore needs a 256x256 icons/icon.png." />
+    <RemoveDir Directories="$(PackageStagingDir)" />
+    <WriteLinesToFile File="$(PackageStagingDir)\manifest.json" Lines="{;  &quot;name&quot;: &quot;$(Product)&quot;,;  &quot;version_number&quot;: &quot;$(Version)&quot;,;  &quot;website_url&quot;: &quot;$(ThunderstoreWebsiteUrl)&quot;,;  &quot;description&quot;: &quot;$(Description)&quot;,;  &quot;dependencies&quot;: [$(ThunderstoreDependencies)];}" />
+    <Copy SourceFiles="$(TargetPath);$(RepoDir)\CHANGELOG.md;$(ThunderstoreIcon)" DestinationFolder="$(PackageStagingDir)" />
+    <!-- Thunderstore shows the package's README.md as the mod page, so it gets the user-facing THUNDERSTORE.md rather than the repo README. -->
+    <Copy SourceFiles="$(RepoDir)\THUNDERSTORE.md" DestinationFiles="$(PackageStagingDir)\README.md" />
+    <MakeDir Directories="$(RepoDir)\dist" />
+    <ZipDirectory SourceDirectory="$(PackageStagingDir)" DestinationFile="$(RepoDir)\dist\$(Authors)-$(Product)-$(Version).zip" Overwrite="true" />
+  </Target>
+
+</Project>

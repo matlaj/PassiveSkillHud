@@ -1,0 +1,48 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+
+      - name: Check the tag and changelog match the version
+        run: |
+          $version = (dotnet msbuild PassiveSkillHud/PassiveSkillHud.csproj -getProperty:Version | Out-String).Trim()
+          if ("v$version" -ne $env:GITHUB_REF_NAME) {
+            Write-Output "::error::Tag $env:GITHUB_REF_NAME doesn't match the version in PassiveSkillHud.csproj ($version)."
+            exit 1
+          }
+          # The release notes are this version's line in CHANGELOG.md, e.g. "- **1.0.0**: Initial release."
+          $prefix = "- **$version**:"
+          $entry = Get-Content CHANGELOG.md | Where-Object { $_.StartsWith($prefix) } | Select-Object -First 1
+          if (-not $entry) {
+            Write-Output "::error::CHANGELOG.md has no entry for $version."
+            exit 1
+          }
+          $entry.Substring($prefix.Length).Trim() | Set-Content -Path "$env:RUNNER_TEMP/notes.md"
+
+      - name: Build and package
+        run: dotnet build PassiveSkillHud/PassiveSkillHud.csproj -c Release -p:Package=true
+
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: gh release create $env:GITHUB_REF_NAME (Get-ChildItem dist/*.zip).FullName --verify-tag --title $env:GITHUB_REF_NAME --notes-file "$env:RUNNER_TEMP/notes.md"
