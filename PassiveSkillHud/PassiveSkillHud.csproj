@@ -17,6 +17,9 @@
     <Description>Shows your survivor's passive skill above the skill bar, with its description on hover.</Description>
     <ThunderstoreWebsiteUrl>https://github.com/matlaj/PassiveSkillHud</ThunderstoreWebsiteUrl>
     <ThunderstoreDependencies>"bbepis-BepInExPack-5.4.2122"</ThunderstoreDependencies>
+    <!-- Where the release workflow publishes the package: the community's slug and its category slugs (https://thunderstore.io/api/experimental/community/riskofrain2/category/). -->
+    <ThunderstoreCommunity>riskofrain2</ThunderstoreCommunity>
+    <ThunderstoreCategories>ai-generated;client-side;skills;tweaks</ThunderstoreCategories>
   </PropertyGroup>
 
   <ItemGroup>

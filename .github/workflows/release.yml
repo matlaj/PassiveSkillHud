@@ -5,14 +5,20 @@ on:
     tags: ['v*']
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   release:
     runs-on: windows-latest
+    permissions:
+      contents: write
     defaults:
       run:
         shell: pwsh
+    outputs:
+      namespace: ${{ steps.thunderstore.outputs.namespace }}
+      community: ${{ steps.thunderstore.outputs.community }}
+      categories: ${{ steps.thunderstore.outputs.categories }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -38,6 +44,14 @@ jobs:
           }
           $entry.Substring($prefix.Length).Trim() | Set-Content -Path "$env:RUNNER_TEMP/notes.md"
 
+      - name: Read where to publish on Thunderstore
+        id: thunderstore
+        run: |
+          $props = (dotnet msbuild PassiveSkillHud/PassiveSkillHud.csproj -getProperty:Authors -getProperty:ThunderstoreCommunity -getProperty:ThunderstoreCategories | Out-String | ConvertFrom-Json).Properties
+          "namespace=$($props.Authors)" >> $env:GITHUB_OUTPUT
+          "community=$($props.ThunderstoreCommunity)" >> $env:GITHUB_OUTPUT
+          "categories=$($props.ThunderstoreCategories)" >> $env:GITHUB_OUTPUT
+
       - name: Build and package
         run: dotnet build PassiveSkillHud/PassiveSkillHud.csproj -c Release -p:Package=true
 
@@ -46,3 +60,60 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: gh release create $env:GITHUB_REF_NAME (Get-ChildItem dist/*.zip).FullName --verify-tag --title $env:GITHUB_REF_NAME --notes-file "$env:RUNNER_TEMP/notes.md"
+
+  # A separate job so that a failed upload can be re-run on its own: the GitHub release already exists by then, and
+  # Thunderstore never accepts the same version twice, so this publishes the exact zip attached to the release.
+  thunderstore:
+    needs: release
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - name: Download the package from the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: gh release download $env:GITHUB_REF_NAME --pattern '*.zip' --dir dist
+
+      - name: Publish to Thunderstore
+        env:
+          THUNDERSTORE_TOKEN: ${{ secrets.THUNDERSTORE_SERVICE_ACCOUNT }}
+          NAMESPACE: ${{ needs.release.outputs.namespace }}
+          COMMUNITY: ${{ needs.release.outputs.community }}
+          CATEGORIES: ${{ needs.release.outputs.categories }}
+        run: |
+          $api = 'https://thunderstore.io/api/experimental'
+          $headers = @{ Authorization = "Bearer $env:THUNDERSTORE_TOKEN" }
+          $zip = Get-Item dist/*.zip
+
+          # The zip goes up as a multipart upload: Thunderstore hands out a pre-signed URL for each part, and the
+          # ETags those return finish it.
+          $initiate = @{ filename = $zip.Name; file_size_bytes = $zip.Length } | ConvertTo-Json
+          $upload = Invoke-RestMethod -Method Post "$api/usermedia/initiate-upload/" -Headers $headers -ContentType application/json -Body $initiate
+          $uuid = $upload.user_media.uuid
+          try {
+            $bytes = [IO.File]::ReadAllBytes($zip.FullName)
+            $parts = foreach ($part in $upload.upload_urls) {
+              $chunk = [byte[]]::new($part.length)
+              [Array]::Copy($bytes, [long]$part.offset, $chunk, 0, [long]$part.length)
+              $response = Invoke-WebRequest -Method Put $part.url -Body $chunk
+              @{ ETag = @($response.Headers.ETag)[0]; PartNumber = $part.part_number }
+            }
+            $finish = @{ parts = @($parts) } | ConvertTo-Json -Depth 5
+            Invoke-RestMethod -Method Post "$api/usermedia/$uuid/finish-upload/" -Headers $headers -ContentType application/json -Body $finish | Out-Null
+          } catch {
+            # Best effort: the upload's own error is the one worth reporting.
+            try { Invoke-RestMethod -Method Post "$api/usermedia/$uuid/abort-upload/" -Headers $headers | Out-Null } catch {}
+            throw
+          }
+
+          $submit = @{
+            upload_uuid = $uuid
+            author_name = $env:NAMESPACE
+            communities = @($env:COMMUNITY)
+            community_categories = @{ $env:COMMUNITY = @($env:CATEGORIES -split ';') }
+            has_nsfw_content = $false
+          } | ConvertTo-Json -Depth 5
+          $result = Invoke-RestMethod -Method Post "$api/submission/submit/" -Headers $headers -ContentType application/json -Body $submit
+          Write-Output "Published $($result.package_version.full_name): https://thunderstore.io/c/$env:COMMUNITY/p/$($result.package_version.namespace)/$($result.package_version.name)/"

@@ -27,4 +27,4 @@ Deploy copies the plugin into the `BepInEx/plugins/PassiveSkillHud` folder of yo
 
 Package builds the Thunderstore upload zip in `dist/`. The version, description and dependencies are set in `PassiveSkillHud.csproj`. The Thunderstore mod page comes from `THUNDERSTORE.md`, not this README, so keep the two in step when changing the user-facing parts.
 
-To release, bump `<Version>` in `PassiveSkillHud.csproj`, add a line for it to `CHANGELOG.md`, and push a matching tag such as `v1.0.1`. CI then publishes a GitHub release with the Thunderstore zip attached.
+To release, bump `<Version>` in `PassiveSkillHud.csproj`, add a line for it to `CHANGELOG.md`, and push a matching tag such as `v1.0.1`. CI then publishes a GitHub release with the Thunderstore zip attached, and uploads that zip to Thunderstore under the community and categories set in `PassiveSkillHud.csproj`, using the team service account token in the `THUNDERSTORE_SERVICE_ACCOUNT` secret. A version can only go to Thunderstore once, so if that upload fails, re-run just the failed job rather than tagging again.
