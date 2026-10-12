@@ -37,6 +37,10 @@
     <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ProfileDir)\BepInEx\plugins\$(AssemblyName)" />
     <Copy SourceFiles="$(ThunderstoreIcon)" DestinationFolder="$(ProfileDir)\BepInEx\plugins\$(AssemblyName)" Condition="Exists('$(ThunderstoreIcon)')" />
   </Target>
+  <!-- dotnet msbuild -t:Undeploy removes that copy again, e.g. before installing the mod from Thunderstore. Takes the same profile properties. -->
+  <Target Name="Undeploy">
+    <RemoveDir Directories="$(ProfileDir)\BepInEx\plugins\$(AssemblyName)" />
+  </Target>
 
   <!-- dotnet build -c Release -p:Package=true builds the Thunderstore upload zip in dist/. -->
   <PropertyGroup>

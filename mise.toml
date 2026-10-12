@@ -13,6 +13,12 @@ usage = 'arg "[profile]" default="Default" help="r2modman profile name"'
 dir = "{{config_root}}/PassiveSkillHud"
 run = 'dotnet build -c Release -p:Deploy=true -p:ProfileName="{{usage.profile}}"'
 
+[tasks.undeploy]
+description = "Remove the deployed plugin from an r2modman profile"
+usage = 'arg "[profile]" default="Default" help="r2modman profile name"'
+dir = "{{config_root}}/PassiveSkillHud"
+run = 'dotnet msbuild -t:Undeploy -p:ProfileName="{{usage.profile}}"'
+
 [tasks.package]
 description = "Build the Thunderstore upload zip into dist/"
 dir = "{{config_root}}/PassiveSkillHud"

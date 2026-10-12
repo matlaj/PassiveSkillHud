@@ -23,7 +23,7 @@ Changes take effect immediately.
 
 The build, deploy and package tasks are in [`mise.toml`](mise.toml): run them with [mise](https://mise.jdx.dev/) (`mise run <task>`), or run the `dotnet` command each one lists. The game, BepInEx and Risk Of Options assemblies come from NuGet, so no game install is needed to build.
 
-Deploy copies the plugin into the `BepInEx/plugins/PassiveSkillHud` folder of your r2modman profile, `Default` unless you name another: `mise run deploy "My Profile"`.
+Deploy copies the plugin into the `BepInEx/plugins/PassiveSkillHud` folder of your r2modman profile, `Default` unless you name another: `mise run deploy "My Profile"`. Undeploy removes that folder again; do this before installing the mod from Thunderstore into the same profile, or BepInEx finds two copies of the plugin.
 
 Package builds the Thunderstore upload zip in `dist/`. The version, description and dependencies are set in `PassiveSkillHud.csproj`. The Thunderstore mod page comes from `THUNDERSTORE.md`, not this README, so keep the two in step when changing the user-facing parts.
 
