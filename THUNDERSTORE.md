@@ -19,6 +19,10 @@ Shows your survivor's passive skill as a round icon above the skill bar. Open th
 
 Changes take effect immediately.
 
+## Help and bug reports
+
+Found a bug, or need help? Open an issue on [GitHub](https://github.com/matlaj/PassiveSkillHud/issues). Including your `BepInEx/LogOutput.log` helps track problems down.
+
 ## Source
 
 [github.com/matlaj/PassiveSkillHud](https://github.com/matlaj/PassiveSkillHud)
