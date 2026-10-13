@@ -1,47 +1,101 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="100%" height="100%">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#26324a"/>
-      <stop offset="1" stop-color="#0d121b"/>
+    <!-- Deep indigo / navy background -->
+    <radialGradient id="voidBg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#14102c" />
+      <stop offset="70%" stop-color="#0a0718" />
+      <stop offset="100%" stop-color="#030208" />
+    </radialGradient>
+
+    <!-- Hot cyan/electric plasma for the main burst -->
+    <linearGradient id="plasmaGrad" x1="0%" y1="100%" x2="70%" y2="0%">
+      <stop offset="0%" stop-color="#2d1b69" />
+      <stop offset="35%" stop-color="#00a3ff" />
+      <stop offset="75%" stop-color="#38f6d2" />
+      <stop offset="100%" stop-color="#f2ffff" />
     </linearGradient>
-    <linearGradient id="passive" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#4a3a1a"/>
-      <stop offset="1" stop-color="#21190b"/>
+
+    <!-- Amber highlight gradient for the ocular core -->
+    <linearGradient id="amberCore" x1="20%" y1="20%" x2="90%" y2="90%">
+      <stop offset="0%" stop-color="#fff4b8" />
+      <stop offset="40%" stop-color="#ffb834" />
+      <stop offset="85%" stop-color="#d44b00" />
+      <stop offset="100%" stop-color="#4d0e00" />
     </linearGradient>
-    <linearGradient id="slot" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#2a3446"/>
-      <stop offset="1" stop-color="#171d28"/>
-    </linearGradient>
-    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
-      <stop offset="0" stop-color="#ffcf5a" stop-opacity="0.55"/>
-      <stop offset="1" stop-color="#ffcf5a" stop-opacity="0"/>
+
+    <!-- Edge vignette -->
+    <radialGradient id="vignette" cx="50%" cy="50%" r="50%">
+      <stop offset="70%" stop-color="#000" stop-opacity="0" />
+      <stop offset="100%" stop-color="#000" stop-opacity="0.75" />
     </radialGradient>
   </defs>
 
-  <rect width="256" height="256" fill="url(#bg)"/>
+  <!-- Base background -->
+  <rect width="256" height="256" fill="url(#voidBg)" />
 
-  <!-- Tooltip -->
-  <rect x="18" y="20" width="220" height="104" rx="6" fill="#0b0f16" stroke="#5c6b85" stroke-width="3"/>
-  <path d="M42 123 L56 140 L70 123 Z" fill="#0b0f16"/>
-  <path d="M42 124.5 L56 140 L70 124.5" fill="none" stroke="#5c6b85" stroke-width="3" stroke-linejoin="round"/>
-  <rect x="19.5" y="21.5" width="217" height="30" rx="4.5" fill="#c79a3a"/>
-  <rect x="19.5" y="40" width="217" height="11.5" fill="#c79a3a"/>
-  <rect x="32" y="31" width="104" height="11" rx="5.5" fill="#fff4dc"/>
-  <rect x="32" y="66" width="190" height="10" rx="5" fill="#c9d3e3"/>
-  <rect x="32" y="84" width="160" height="10" rx="5" fill="#c9d3e3"/>
-  <rect x="32" y="102" width="118" height="10" rx="5" fill="#8fa0ba"/>
+  <!-- Background energy rays (sharp, faceted angular shapes typical of RoR2) -->
+  <polygon points="128,128 40,24 92,16" fill="#1b2559" opacity="0.6" />
+  <polygon points="128,128 214,32 236,78" fill="#152b66" opacity="0.5" />
+  <polygon points="128,128 240,180 210,224" fill="#23174a" opacity="0.7" />
+  <polygon points="128,128 46,218 20,166" fill="#1a1c4e" opacity="0.6" />
 
-  <!-- Skill bar: the passive, then the regular skills -->
-  <circle cx="56" cy="186" r="58" fill="url(#glow)"/>
-  <rect x="24" y="154" width="64" height="64" rx="6" fill="url(#passive)" stroke="#ffcf5a" stroke-width="5"/>
-  <path d="M56 165 L62 180 L77 186 L62 192 L56 207 L50 192 L35 186 L50 180 Z" fill="#ffd970"/>
-  <circle cx="56" cy="186" r="5" fill="#fff6d8"/>
+  <!-- Diagonal kinetic slash / surge through the center -->
+  <polygon points="18,210 138,102 118,92 10,192" fill="#0052a3" opacity="0.5" />
+  <polygon points="34,228 218,52 234,64 62,238" fill="url(#plasmaGrad)" opacity="0.3" />
 
-  <rect x="100" y="154" width="64" height="64" rx="6" fill="url(#slot)" stroke="#55627a" stroke-width="4"/>
-  <rect x="176" y="154" width="64" height="64" rx="6" fill="url(#slot)" stroke="#55627a" stroke-width="4"/>
-  <path d="M116 202 L148 170 M140 170 L148 170 L148 178" fill="none" stroke="#7d8aa3" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="208" cy="186" r="15" fill="none" stroke="#7d8aa3" stroke-width="7"/>
+  <!-- Angular particle shards -->
+  <polygon points="72,52 84,44 78,60" fill="#38f6d2" opacity="0.8" />
+  <polygon points="56,76 66,72 60,86" fill="#00a3ff" opacity="0.7" />
+  <polygon points="186,182 196,170 198,190" fill="#ffb834" opacity="0.7" />
+  <polygon points="208,160 214,152 216,166" fill="#ff7700" opacity="0.6" />
+  <polygon points="170,210 182,206 174,220" fill="#38f6d2" opacity="0.5" />
 
-  <!-- Cursor hovering the passive -->
-  <path d="M74 196 L74 238 L84 228 L91 243 L99 239 L92 225 L106 225 Z" fill="#ffffff" stroke="#0b0f16" stroke-width="4" stroke-linejoin="round"/>
+  <!-- Outer HUD Ring: segmented inspection aperture (Tab/inspect motif) -->
+  <circle cx="128" cy="128" r="88" fill="none" stroke="#1c1f4a" stroke-width="12" />
+  <circle cx="128" cy="128" r="88" fill="none" stroke="#00d5ff" stroke-width="5"
+    stroke-dasharray="85 25 140 30" />
+  <circle cx="128" cy="128" r="88" fill="none" stroke="#ffffff" stroke-width="2"
+    stroke-dasharray="20 160 35 60" opacity="0.8" />
+
+  <!-- Outer diamond tick marks (cardinal HUD reticle) -->
+  <polygon points="128,26 133,38 128,42 123,38" fill="#38f6d2" />
+  <polygon points="128,230 133,218 128,214 123,218" fill="#38f6d2" />
+  <polygon points="26,128 38,133 42,128 38,123" fill="#38f6d2" />
+  <polygon points="230,128 218,133 214,128 218,123" fill="#38f6d2" />
+
+  <!-- Central "All-Seeing Eye" / Passive Awareness Motif -->
+  <!-- Outer eye contour (chunky, angular silhouette) -->
+  <path d="M 46,128 C 76,82 180,82 210,128 C 180,174 76,174 46,128 Z" fill="#0b0820"
+    stroke="#003554" stroke-width="5" />
+
+  <!-- Sclera energy fill -->
+  <path d="M 54,128 C 82,92 174,92 202,128 C 174,164 82,164 54,128 Z" fill="#081a38" />
+  <path d="M 54,128 C 82,92 174,92 202,128 C 160,118 96,118 54,128 Z" fill="#0d3b66" opacity="0.6" />
+
+  <!-- Luminous Iris & Pupil -->
+  <circle cx="128" cy="128" r="38" fill="#1b0826" stroke="#ff8800" stroke-width="3" />
+  <circle cx="128" cy="128" r="32" fill="url(#amberCore)" />
+
+  <!-- Slit / Core Gem pupil -->
+  <polygon points="128,100 137,128 128,156 119,128" fill="#1f0300" />
+  <polygon points="128,104 134,128 128,152 125,128" fill="#000000" />
+
+  <!-- High-contrast angular specular highlights -->
+  <polygon points="112,112 124,106 120,120" fill="#ffffff" opacity="0.95" />
+  <polygon points="140,140 148,136 144,144" fill="#ffeaa7" opacity="0.8" />
+  <polygon points="80,126 102,118 94,128" fill="#38f6d2" opacity="0.5" />
+
+  <!-- Ambient floating orbital brackets -->
+  <path d="M 98,72 L 86,72 L 74,84" fill="none" stroke="#38f6d2" stroke-width="3" opacity="0.7" />
+  <path d="M 158,184 L 170,184 L 182,172" fill="none" stroke="#ffb834" stroke-width="3"
+    opacity="0.7" />
+
+  <!-- Signature RoR2 Skill Inset Frame -->
+  <rect x="12" y="12" width="232" height="232" fill="none" stroke="#161230" stroke-width="18"
+    opacity="0.6" />
+  <rect x="21" y="21" width="214" height="214" fill="none" stroke="#332a63" stroke-width="2"
+    opacity="0.7" />
+
+  <!-- Dark corner vignette -->
+  <rect width="256" height="256" fill="url(#vignette)" pointer-events="none" />
 </svg>
