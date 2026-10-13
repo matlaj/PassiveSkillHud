@@ -16,9 +16,13 @@ API = "https://thunderstore.io/api/experimental"
 # Seconds to wait on a stalled connection, so that a request that never answers fails the job instead of hanging it.
 TIMEOUT = 60
 
+# Thunderstore's Cloudflare front refuses urllib's default "Python-urllib/3.x" with error 1010.
+USER_AGENT = "PassiveSkillHud-release (+https://github.com/matlaj/PassiveSkillHud)"
+
 
 def send(request, name):
     """Sends a request and returns its response body and headers."""
+    request.add_header("User-Agent", USER_AGENT)
     try:
         with urllib.request.urlopen(request, timeout=TIMEOUT) as response:
             return response.read(), response.headers
