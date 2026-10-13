@@ -20,6 +20,14 @@
     <!-- Where the release workflow publishes the package: the community's slug and its category slugs (https://thunderstore.io/api/experimental/community/riskofrain2/category/). -->
     <ThunderstoreCommunity>riskofrain2</ThunderstoreCommunity>
     <ThunderstoreCategories>ai-generated;client-side;skills;tweaks</ThunderstoreCategories>
+    <!-- The package's manifest.json. MSBuild still expands the properties inside the CDATA. -->
+    <ThunderstoreManifest><![CDATA[{
+  "name": "$(Product)",
+  "version_number": "$(Version)",
+  "website_url": "$(ThunderstoreWebsiteUrl)",
+  "description": "$(Description)",
+  "dependencies": [$(ThunderstoreDependencies)]
+}]]></ThunderstoreManifest>
   </PropertyGroup>
 
   <ItemGroup>
@@ -58,7 +66,8 @@
     </PropertyGroup>
     <Error Condition="!Exists('$(ThunderstoreIcon)')" Text="Thunderstore needs a 256x256 icons/icon.png." />
     <RemoveDir Directories="$(PackageStagingDir)" />
-    <WriteLinesToFile File="$(PackageStagingDir)\manifest.json" Lines="{;  &quot;name&quot;: &quot;$(Product)&quot;,;  &quot;version_number&quot;: &quot;$(Version)&quot;,;  &quot;website_url&quot;: &quot;$(ThunderstoreWebsiteUrl)&quot;,;  &quot;description&quot;: &quot;$(Description)&quot;,;  &quot;dependencies&quot;: [$(ThunderstoreDependencies)];}" />
+    <!-- Escaped so that it goes in as one line: a ; in a value would otherwise split it. -->
+    <WriteLinesToFile File="$(PackageStagingDir)\manifest.json" Lines="$([MSBuild]::Escape($(ThunderstoreManifest)))" />
     <Copy SourceFiles="$(TargetPath);$(RepoDir)\CHANGELOG.md;$(ThunderstoreIcon)" DestinationFolder="$(PackageStagingDir)" />
     <!-- Thunderstore shows the package's README.md as the mod page, so it gets the user-facing THUNDERSTORE.md rather than the repo README. -->
     <Copy SourceFiles="$(RepoDir)\THUNDERSTORE.md" DestinationFiles="$(PackageStagingDir)\README.md" />
