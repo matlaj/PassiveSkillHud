@@ -23,3 +23,12 @@ run = 'dotnet msbuild -t:Undeploy -p:ProfileName="{{usage.profile}}"'
 description = "Build the Thunderstore upload zip into dist/"
 dir = "{{config_root}}/PassiveSkillHud"
 run = "dotnet build -c Release -p:Package=true"
+
+[tasks.release]
+description = "Tag the version in PassiveSkillHud.csproj and push it with main, which starts the release workflow"
+dir = "{{config_root}}"
+env = { VERSION = '{{ exec(command="dotnet msbuild PassiveSkillHud/PassiveSkillHud.csproj -getProperty:Version") | trim }}' }
+run = [
+  "git tag v{{env.VERSION}}",
+  "git push --atomic origin main v{{env.VERSION}}",
+]
