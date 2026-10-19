@@ -13,7 +13,7 @@
     <Authors>ntshtng</Authors>
     <Product>PassiveSkillHud</Product>
     <BepInExPluginGuid>$(Authors).$(Product)</BepInExPluginGuid>
-    <Version>1.0.1</Version>
+    <Version>1.0.2</Version>
     <Description>Shows your survivor's passive skill above the skill bar, with its description on hover.</Description>
     <ThunderstoreWebsiteUrl>https://github.com/matlaj/PassiveSkillHud</ThunderstoreWebsiteUrl>
     <ThunderstoreDependencies>"bbepis-BepInExPack-5.4.2122"</ThunderstoreDependencies>

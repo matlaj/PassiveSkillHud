@@ -1,3 +1,7 @@
+## 1.0.2
+
+- Fix icon when spectating.
+
 ## 1.0.1
 
 - New icon.
