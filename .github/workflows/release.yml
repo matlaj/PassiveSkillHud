@@ -17,9 +17,9 @@ jobs:
     permissions:
       contents: write
     outputs:
-      namespace: ${{ steps.thunderstore.outputs.namespace }}
-      community: ${{ steps.thunderstore.outputs.community }}
-      categories: ${{ steps.thunderstore.outputs.categories }}
+      namespace: ${{ steps.package.outputs.namespace }}
+      community: ${{ steps.package.outputs.community }}
+      categories: ${{ steps.package.outputs.categories }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -29,12 +29,30 @@ jobs:
         with:
           global-json-file: global.json
 
-      - name: Check the tag and changelog match the version
-        run: python .github/scripts/check_release.py
+      # The version, and where to publish on Thunderstore, come from PassiveSkillHud.csproj. MSBuild prints the properties as JSON;
+      # tr drops the carriage returns Windows tools can add, which would otherwise end up in the values.
+      - name: Read the package properties
+        id: package
+        run: |
+          dotnet msbuild PassiveSkillHud/PassiveSkillHud.csproj -getProperty:Version -getProperty:Authors \
+            -getProperty:ThunderstoreCommunity -getProperty:ThunderstoreCategories \
+            | jq -r '.Properties | "version=\(.Version)", "namespace=\(.Authors)",
+                "community=\(.ThunderstoreCommunity)", "categories=\(.ThunderstoreCategories)"' \
+            | tr -d '\r' >> "$GITHUB_OUTPUT"
 
-      - name: Read where to publish on Thunderstore
-        id: thunderstore
-        run: python .github/scripts/thunderstore_target.py
+      - name: Check the tag and changelog match the version
+        env:
+          VERSION: ${{ steps.package.outputs.version }}
+        run: |
+          if [ "$GITHUB_REF_NAME" != "v$VERSION" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME doesn't match the version in PassiveSkillHud.csproj ($VERSION)."
+            exit 1
+          fi
+          # Each version in CHANGELOG.md has its own heading, e.g. "## 1.0.0". The checkout can have Windows line endings.
+          if ! tr -d '\r' < CHANGELOG.md | grep -qxF "## $VERSION"; then
+            echo "::error::CHANGELOG.md has no entry for $VERSION."
+            exit 1
+          fi
 
       - name: Build and package
         run: dotnet build PassiveSkillHud/PassiveSkillHud.csproj -c Release -p:Package=true

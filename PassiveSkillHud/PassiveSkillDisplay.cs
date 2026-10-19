@@ -401,6 +401,9 @@ public class PassiveSkillDisplay : MonoBehaviour
         {
             image.sprite = sprite;
             image.color = Color.white;
+            // The primary icon hides its picture while it has no skill to show, as when the watched player has just
+            // died. A copy made before its next update starts out hidden too, such as on switching to spectate.
+            image.enabled = true;
             tooltip.titleToken = nameToken;
             tooltip.bodyToken = descriptionToken;
             // Like the character select screen, explain the keywords (e.g. Poison) under the description.
